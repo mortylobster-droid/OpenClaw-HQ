@@ -1,0 +1,431 @@
+# OpenClaw Installation — User Guide
+
+Last updated: 2026-02-05 Owner: Atlas ([mortylobster@gmail.com](mailto:mortylobster@gmail.com))
+
+This guide is written from real setup experience (including the weird blockers we actually hit) and is meant to be used as a practical checklist.
+
+---
+
+## 0.5) Define goals & roadmap (do this before wiring everything)
+
+OpenClaw becomes 10× easier to configure when you know **what the agent is for**. Otherwise you’ll install integrations randomly and hit blockers without knowing what matters.
+
+### Pick your track
+- **Personal productivity agent:** reminders, inbox triage, research + summaries, personal ops.
+- **Company/ops agent:** monitoring, incident alerts, cost control, customer support tooling.
+- **Builder agent:** helps you ship apps/automations (front-end projects + workflows).
+- **Content agent:** research → drafts → review → publish.
+
+### Roadmap template (tiers)
+**Tier 1 — Foundation (now)**
+- Connections: Drive/Sheets/Docs + task system (Project Planner sheet) + automation runner (n8n) + one messaging channel.
+- Reliability: sanity checks, logs, backups.
+
+**Tier 2 — Shipping (next)**
+- One front-end project shipped end-to-end.
+- One automation shipped end-to-end (with retries + alerting).
+
+**Tier 3 — Scale + content**
+- Weekly digests (resources/news/costs) that feed back into your knowledge base.
+- Reviewer model (“second brain”) for PRs/deployments.
+
+Rule: pick **one** Tier-2 deliverable at a time.
+
+## 0.6) Maintain a living knowledge base (Sheet + Drive folder)
+
+You want two things:
+1) A place for **structured knowledge** the agent can update (Google Sheet).
+2) A place for **narrative docs/specs** (Drive folder) so humans can follow along.
+
+Recommended pattern:
+- **Resources Repo (Tools tab)** is the single canonical table of links.
+  - Columns: Name, Description, URL, Category, Tags, Source, AddedOn, Status
+  - Status lifecycle: Candidate → Approved → Added → Archived
+
+Ideas tab:
+- Capture quick inspirations without forcing them into a project
+- When an idea matures, link it to a Project Planner row (RelatedProject)
+- **Weekly digest → approval loop:** the agent sends candidates to Telegram, you approve by replying with numbers, the agent writes back to the sheet.
+
+### What should live in the Drive folder (minimum)
+- This installation guide (canonical + versioned)
+- Goals & roadmap (your current plan)
+- Resources Repo specs (schema + discovery pipeline)
+- Automation specs (one per workflow)
+- Ops logs / change log (what changed, when, why)
+
+---
+
+## 0\) Recommended mindset (so you don’t get stuck)
+
+### Start with momentum, then harden security
+
+When you’re prototyping, **connection blockers kill progress**. For the first week it’s OK to:
+
+- grant broad access scopes (Drive/Sheets/Docs, Trello, GitHub),  
+- get the workflows running end-to-end,  
+- then tighten permissions after you have proof the system works.
+
+The security hardening phase should include:
+
+- least-privilege tokens (repo-scoped PATs, board-scoped tokens),  
+- token rotation,  
+- audit logging, and  
+- reducing what runs “automatically” vs “requires approval”.
+
+---
+
+## 1\) Hosting options (what to run OpenClaw on)
+
+### A) VPS (recommended for 24/7 agents)
+
+Best when you want:
+
+- always-on automations (cron, webhooks, n8n),  
+- stable public HTTPS endpoints,  
+- easier remote access.
+
+Pros:
+
+- reliable uptime  
+- public IP \+ domain-friendly  
+- predictable environment
+
+Cons:
+
+- you manage basic ops (updates, firewall, backups)
+
+### B) Cloud VM (AWS/GCP/Azure)
+
+Similar to VPS but heavier tooling.
+
+Pros:
+
+- integrates well with cloud services  
+- easy scaling
+
+Cons:
+
+- can get expensive if left running  
+- more moving parts (IAM, networking)
+
+### C) Personal PC (Windows/Linux)
+
+Good for learning and local-only automation.
+
+Pros:
+
+- easiest to iterate locally  
+- direct access to your files
+
+Cons:
+
+- not always on  
+- local network / NAT makes webhooks harder
+
+**Windows caveat:** shell mismatch is common (PowerShell vs Bash). More on that below.
+
+### D) Mac mini
+
+Great “home server” option.
+
+Pros:
+
+- low power, stable  
+- easy local dev \+ always on
+
+Cons:
+
+- still a machine to maintain
+
+### E) Raspberry Pi
+
+Good for tinkering; not ideal if you’re running heavier workflows.
+
+Pros:
+
+- cheap, low power
+
+Cons:
+
+- ARM quirks, performance limits
+
+---
+
+## 2\) Installation guide
+
+### 2.1 The \#1 trap: Bash vs PowerShell
+
+If a command is written for Bash (common in docs), running it in PowerShell can break.
+
+Symptoms:
+
+- one-liner install commands fail with “command not found” / weird quoting issues  
+- environment variables don’t set the way you expect
+
+Fix:
+
+- On Windows, prefer one of:  
+  - WSL (Ubuntu)  
+  - Git Bash  
+  - a proper Linux VPS
+
+Rule of thumb:
+
+- If you see: `curl ... | bash` or single quotes `'...'` everywhere, **use Bash**.
+
+### 2.2 Set up wizard (what it should accomplish)
+
+A good initial setup should get you to:
+
+- a running OpenClaw gateway/service  
+- a configured channel (Telegram is the easiest)  
+- a persistent workspace \+ memory files  
+- the ability to run tools (web, exec, cron)
+
+### 2.3 Recommended “first run” checklist
+
+- Confirm OpenClaw is running: `openclaw status`  
+- Confirm you can message the bot and get a reply  
+- Confirm memory files are writable  
+- Confirm cron can run and deliver a reminder
+
+---
+
+## 3\) Must-have capabilities before “production”
+
+This is ordered by what prevents the most pain.
+
+### Priority 0 — Observability \+ sanity checks
+
+Before adding lots of integrations, you need:
+
+- a habit of running quick tests after every new connection  
+- a log trail of what changed
+
+Why: we’ve already hit issues like “OAuth JSON exists but wasn’t remembered later” and webhook/env quirks.
+
+**Rule:** Every time we gain access to a new service, run a 2-minute verification test immediately.
+
+### Priority 1 — Memory (so progress persists)
+
+You want:
+
+- daily notes in `memory/YYYY-MM-DD.md`  
+- curated `MEMORY.md` for long-term facts  
+- an index file (we already have `memory/INDEX.md`)
+
+Recommended policy:
+
+- log decisions, tokens location (not the token itself), URLs, workflow IDs
+
+### Priority 2 — Google Drive \+ Sheets \+ Docs
+
+Why: it becomes your “knowledge base” and structured data store.
+
+What to set up:
+
+- Drive read/write  
+- Sheets read/write (append/update)  
+- Docs create (and ideally editing later)
+
+Caveats we actually hit:
+
+- OAuth on a headless VPS: the normal browser callback flow times out  
+- Manual OAuth works, but token storage failed until we configured keyring backend \+ password
+
+**Fix we used:**
+
+- gog manual auth flow  
+- set keyring backend to file  
+- set `GOG_KEYRING_PASSWORD` in the environment
+
+### Priority 3 — Gmail
+
+Use cases:
+
+- digests, summaries, alerts, drafts
+
+Policy recommendation:
+
+- Drafting can be automatic  
+- Sending should require explicit confirmation (human-in-the-loop)
+
+### Priority 4 — n8n (automation glue)
+
+Use cases:
+
+- schedules  
+- webhooks  
+- multi-step workflows
+
+Caveats:
+
+- API endpoints differ depending on n8n version and path; some `/api/v1/...` may not exist  
+- webhook production URLs require workflow active \+ proper webhookId
+
+### Priority 5 — Project Planner (Google Sheets Kanban)
+
+Use cases:
+
+- source-of-truth for tasks  
+- backlog grooming \+ weekly plan
+
+Caveats:
+
+- easiest to start with broad token access  
+- later: restrict to board-specific permissions
+
+---
+
+## 4\) Sanity-check tests (run often)
+
+### A) After any new integration
+
+Do a small test that proves read/write:
+
+- Drive: create a file in the target folder  
+- Sheets: update header or append a test row  
+- Trello: create card \+ then list cards  
+- GitHub: create issue \+ comment
+
+### B) Scheduled checks (weekly)
+
+- Confirm tokens still valid  
+- Confirm n8n webhooks still registered  
+- Confirm digests still deliver to Telegram
+
+### C) Avoid silent failures
+
+Prefer:
+
+- explicit success confirmations (messages, logs)  
+- retry \+ alert on failure
+
+---
+
+## 5\) “Second brain” / review model
+
+Add a reviewer pipeline once core integrations are stable.
+
+Examples:
+
+- code review on PRs  
+- deployment checklist review  
+- security checklist review
+
+Options:
+
+- same model, different session (fast)  
+- different model (Gemini) as an independent reviewer
+
+Key idea: treat reviewers like CI — they should produce:
+
+- risks  
+- missing steps  
+- suggested tests
+
+---
+
+## 6\) Additional skills to consider (after basics)
+
+Creative/Media:
+
+- Nano Banana (image gen/edit)  
+- ElevenLabs (TTS) for voice posts and story-style content
+
+Developer productivity:
+
+- coding-agent skill  
+- session-logs skill (for auditing \+ searching past runs)
+
+---
+
+## 7\) Logging & audit trail (non-negotiable)
+
+Log:
+
+- what changed  
+- when  
+- why  
+- where credentials live  
+- workflow IDs / URLs
+
+We should eventually:
+
+- log key bot interactions  
+- store a weekly “ops report” in Drive
+
+---
+
+## 8\) Interaction style (how Morty should handle requests)
+
+- Always restate the plan briefly  
+- Ask only the minimum clarifying questions  
+- Enhance the request: add structure, defaults, safety checks  
+- Prefer shipping an MVP \+ iterating over perfection
+
+---
+
+## 9\) Once stable: be proactive
+
+When there are no more connection blockers:
+
+- propose new automation ideas  
+- suggest weekly debriefs \+ monitoring  
+- keep an eye on new skills/MCPs/tools relevant to your stack
+
+
+
+
+---
+
+## 10) Drive folder hygiene (avoid confusion)
+
+Keep one **canonical** copy of each document, and archive older versions deliberately.
+
+In our Resources folder we already saw duplicates (same filename uploaded twice). That’s fine during setup, but for production:
+- rename older ones with a date suffix, or move them to an `Archive/` folder
+- keep only one current file named without suffix
+
+
+
+
+
+---
+
+## Summarization (Summarize CLI) — make the agent faster
+
+Summarization is a force multiplier for everything else (research, resource discovery, audits, writing).
+
+### What we installed
+- Summarize CLI: `@steipete/summarize` (requires Node 22+)
+
+### Provider choice (Gemini)
+We use Gemini as the default model.
+
+### Where the key lives (VPS)
+- `GEMINI_API_KEY` is stored at:
+  - `/root/.openclaw/credentials/google/gemini_api_key.txt`
+
+### How we run it (Option A: wrapper export)
+We do NOT persist the key into the system service environment yet.
+Instead, whenever Morty runs `summarize`, it loads the key from the file and exports it for that command.
+
+Why this is good early on:
+- avoids accidentally leaking secrets into service logs or shell profiles
+- keeps changes reversible
+
+### Summarize config
+- `~/.summarize/config.json`
+  - default model: `google/gemini-3-flash-preview`
+  - format: markdown
+
+### Sanity tests (run after setup)
+- URL summary:
+  - `summarize "https://docs.openclaw.ai" --length short --force-summary --no-cache`
+- Extract-only (no LLM call):
+  - `summarize "https://example.com" --extract --format md`
+
+Common gotcha:
+- If you forget `--force-summary` on short pages, Summarize may return the extracted content as-is instead of calling the LLM.
