@@ -45,7 +45,7 @@ Everything meaningful flows through Git.
    Brain OpenClaw              Frontend OpenClaw           Backend OpenClaw
  (Mac mini – Claude)        (Mac VM – Gemini/Kimi)        (VPS – Codex)
  ──────────────────         ─────────────────────         ─────────────────
- - Reads /FELIPE/*           - Pulls tasks from TASKS.md   - Pulls tasks from TASKS.md
+                             - Pulls tasks from TASKS.md   - Pulls tasks from TASKS.md
  - Writes TASKS.md           - Builds UI / UX              - Builds APIs / automations
  - Architecture              - Pushes branches             - Pushes branches
  - Final review              - Never merges                - Never merges
@@ -152,20 +152,19 @@ Additional note:
 
 ## 4) Task Dispatch and Review Loop
 
-Only Brain creates tasks.
+Only the Brain agent creates tasks.
 
-Default flow:
+Felipe does **not** assign work by editing `/FELIPE` for agents to consume (that folder is locked). Instead, the default operating flow is:
 
-1. Felipe updates /FELIPE/GOALS.md and /FELIPE/ROADMAP.md
-2. Brain translates intent into TASKS.md
-3. Frontend and Backend pull tasks and implement
-4. They push branches / PRs
-5. Brain reviews both outputs (final review)
-6. Brain integrates and finalizes
-7. Felipe approves if sensitive actions are involved
-8. Brain merges to main
+1. Felipe messages the **Brain agent** (Telegram) to create a new project or define a new objective
+2. Brain decomposes the objective into actionable work items and writes them into the task area (for example `TASKS.md` and/or a `tasks/` folder in the repo)
+3. Frontend and Backend agents pull tasks from the shared task area and implement them in their respective domains
+4. Frontend and Backend push branches / PRs to GitHub
+5. Brain performs **final review** (it has the full context), integrates changes, and prepares the merge
+6. Felipe approves if sensitive actions are involved (logins, messaging humans, deployments, payments, credential changes)
+7. Brain merges to main
 
-Frontend and Backend never self-assign work.
+Felipe does not need to routinely message the Frontend or Backend agents directly. The Brain agent acts as the single interface and dispatcher.
 
 ---
 
@@ -256,3 +255,4 @@ This forms a durable, scalable multi-agent engineering system under human contro
 ---
 
 End of file.
+
