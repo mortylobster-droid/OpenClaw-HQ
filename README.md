@@ -176,7 +176,9 @@ This rule is strict and non-negotiable.
 
 All agents follow a shared cost philosophy:
 
-- Ollama (local) is always attempted first  
+If Installed,
+
+- Ollama (local) is always attempted if task is simple.  
 - OpenRouter (paid models) is used only when necessary  
 
 Paid models are reserved for:
