@@ -33,8 +33,8 @@
 
 ## 2. Telegram Integration
 
-- **Bot Username:** @FelipeEche27
-- **Bot ID:** 6026695075
+- **Bot Username:** @
+- **Bot ID:** 602....
 - **Status:** ✅ Configured and working
 - **Purpose:** Primary communication channel between Atlas and Brain Agent
 - **Configuration:** `~/.openclaw/openclaw.json`
@@ -53,7 +53,7 @@
 ## 4. Gmail OAuth Integration
 
 ### Account Details
-- **Email:** mortylobster@gmail.com
+- **Email:** mortylob....
 - **Status:** ✅ Fully authorized
 - **Scopes:** `gmail.readonly`, `gmail.modify`, `gmail.send`
 
@@ -111,9 +111,9 @@
 ### Instance Details
 - **Version:** 2.7.4
 - **Deployment:** Docker container
-- **Local URL:** http://localhost:5678
+- **Local URL:** http://localhost:...
 - **Public URL:** https://n8n.ricksanchezautomations.com (DNS propagating)
-- **Temporary URL:** https://sign-discounted-arabic-follow.trycloudflare.com
+- **Temporary URL:** https://sign-discounted-arabic-fo.....
 
 ### Authentication
 - **Basic Auth User:** atlas
@@ -170,9 +170,9 @@ N8N_BASIC_AUTH_ACTIVE=true
 
 ### Tunnel Details
 - **Name:** n8n-atlas
-- **ID:** f7cf7648-bb4f-42ad-b92e-12d545ebada4
+- **ID:** f7cf7648-bb4f-42ad-b92e-12d545e....
 - **Domain:** n8n.ricksanchezautomations.com
-- **Local service:** http://localhost:5678
+- **Local service:** http://localhost:...
 
 ### DNS Status
 - **CNAME record:** Created and configured
@@ -280,8 +280,8 @@ Internet → Cloudflare Tunnel → n8n (Docker) → OpenClaw
 ### Local URLs
 | Service | URL | Notes |
 |---------|-----|-------|
-| OpenClaw | http://localhost:18789 | Gateway |
-| n8n | http://localhost:5678 | HTTP mode |
+| OpenClaw | http://localhost: | Gateway |
+| n8n | http://localhost:| HTTP mode |
 | Docker | unix:///var/run/docker.sock | Local socket |
 
 ### GitHub Commands
