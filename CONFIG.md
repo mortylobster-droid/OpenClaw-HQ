@@ -112,7 +112,7 @@
 - **Version:** 2.7.4
 - **Deployment:** Docker container
 - **Local URL:** http://localhost:...
-- **Public URL:** https://n8n.ricksanchezautomations.com (DNS propagating)
+- **Public URL:** https://n8n.mortyautomations.com (✅ ACTIVE)
 - **Temporary URL:** https://sign-discounted-arabic-fo.....
 
 ### Authentication
@@ -171,7 +171,7 @@ N8N_BASIC_AUTH_ACTIVE=true
 ### Tunnel Details
 - **Name:** n8n-atlas
 - **ID:** f7cf7648-bb4f-42ad-b92e-12d545e....
-- **Domain:** n8n.ricksanchezautomations.com
+- **Domain:** n8n.mortyautomations.com (✅ ACTIVE)
 - **Local service:** http://localhost:...
 
 ### DNS Status
@@ -325,7 +325,7 @@ cloudflared tunnel info n8n-atlas
 ### Cloudflare tunnel down
 1. Check status: `cloudflared tunnel info n8n-atlas`
 2. Restart: `cloudflared tunnel run n8n-atlas`
-3. Check DNS: `host n8n.ricksanchezautomations.com`
+3. Check DNS: `host n8n.mortyautomations.com`
 
 ### Model routing issues
 1. Check config: `cat ~/.openclaw/openclaw.json | grep -A5 models`
@@ -337,7 +337,7 @@ cloudflared tunnel info n8n-atlas
 ## 14. Next Steps / TODO
 
 ### Immediate
-- [ ] Wait for DNS propagation (ricksanchezautomations.com)
+- [x] Wait for DNS propagation (mortyautomations.com) ✅ DONE
 - [ ] Test public n8n URL
 - [ ] Verify Gmail credential in n8n UI is persistent
 
