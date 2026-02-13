@@ -96,10 +96,13 @@ Captures:
 | Trigger | Threshold | Action |
 |---------|-----------|--------|
 | Message count | > 50 messages | Compress to summary |
-| Session duration | > 2 hours | Archive working context |
+| Meaningful resolution | Significant decisions made | Compress immediately |
+| Token buffer | > 8000 tokens OR approaching 100% | Pre-compaction flush |
 | Context switches | > 3 topics | Write decision log |
-| Token buffer | > 8000 tokens | Pre-compaction flush |
-| User request | "wrap up" / "summarize" | Immediate compaction |
+| Session duration | > 2 hours | Archive working context |
+| User request | "wrap up" / "summarize" / "remember this" | Immediate compaction |
+
+**Note on token limits:** When context hits 100% (e.g., 262k/262k tokens), older messages are truncated and lost. Proactive compression before this prevents amnesia.
 
 ### What Gets Preserved
 **KEEP:**
